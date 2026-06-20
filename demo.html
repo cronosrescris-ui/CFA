@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCU + CFA + SDHM – Sistem Unificat</title>
+    <style>
+        /* ====== STILURI GENERALE ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0A0A0F;
+            color: #E0F0FF;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: #111118;
+            border: 1px solid #2A3A5A;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 0 60px rgba(0, 200, 255, 0.05);
+        }
+        h1 {
+            color: #FFD700;
+            font-size: 22px;
+            text-align: center;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #2A3A5A;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        h2 {
+            color: #00CED1;
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            border-left: 3px solid #00CED1;
+            padding-left: 12px;
+        }
+        h3 {
+            color: #7EC8E3;
+            font-size: 14px;
+            margin: 12px 0 8px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-right: 6px;
+        }
+        .badge-meta { background: #8B00FF; color: #fff; }
+        .badge-fizic { background: #FF4500; color: #fff; }
+        .badge-info { background: #00CED1; color: #0A0A0F; }
+        .badge-memorie { background: #FFD700; color: #0A0A0F; }
+
+        /* ====== GRILA DE STRATURI ====== */
+        .layers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        @media (max-width: 900px) {
+            .layers-grid { grid-template-columns: 1fr; }
+        }
+        .layer-card {
+            background: #14141E;
+            border: 1px solid #1E2A3A;
+            border-radius: 12px;
+            padding: 18px;
+            transition: border-color 0.3s;
+        }
+        .layer-card:hover {
+            border-color: #00CED1;
+        }
+        .layer-card .title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .layer-card .title span {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* ====== PANOU DE CONTROL ====== */
+        .control-panel {
+            background: #0A0A12;
+            border: 1px solid #1E2A3A;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        .control-panel button {
+            background: #00CED1;
+            color: #0A0A0F;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+        }
+        .control-panel button:hover {
+            background: #FFD700;
+            transform: scale(1.03);
+        }
+        .control-panel button.secondary {
+            background: #2A3A5A;
+            color: #E0F0FF;
+        }
+        .control-panel button.secondary:hover {
+            background: #3A4A6A;
+        }
+        .control-panel input, .control-panel select {
+            background: #0A0A12;
+            border: 1px solid #2A3A5A;
+            color: #E0F0FF;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-width: 160px;
+        }
+        .control-panel input:focus, .control-panel select:focus {
+            outline: none;
+            border-color: #00CED1;
+        }
+
+        /* ====== REZULTATE ====== */
+        #output {
+            background: #0A0A12;
+            border: 1px solid #1E2A3A;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+        }
+        #output .success { color: #90EE90; }
+        #output .warning { color: #FFD700; }
+        #output .error { color: #FF6B6B; }
+        #output .info { color: #7EC8E3; }
+        #output .highlight { color: #FF8C00; font-weight: bold; }
+
+        /* ====== REȚEAUA DE PUNCTE (Canvas) ====== */
+        .canvas-wrapper {
+            background: #0A0A12;
+            border: 1px solid #1E2A3A;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .canvas-wrapper canvas {
+            background: #0A0A12;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+            aspect-ratio: 1/1;
+            border: 1px solid #1A2A3A;
+        }
+
+        /* ====== STARE SISTEM ====== */
+        .status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-between;
+            background: #0A0A12;
+            border-radius: 8px;
+            padding: 12px 18px;
+            margin-top: 15px;
+            border: 1px solid #1E2A3A;
+            font-size: 12px;
+        }
+        .status-bar .item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-bar .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot.green { background: #90EE90; box-shadow: 0 0 8px #90EE90; }
+        .dot.orange { background: #FFD700; box-shadow: 0 0 8px #FFD700; }
+        .dot.red { background: #FF6B6B; box-shadow: 0 0 8px #FF6B6B; }
+        .dot.blue { background: #00CED1; box-shadow: 0 0 8px #00CED1; }
+
+        /* ====== SCROLL ====== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            background: #0A0A12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A3A5A;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00CED1;
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            h1 { font-size: 16px; }
+            .control-panel { flex-direction: column; }
+            .control-panel input, .control-panel select { width: 100%; }
+            .layers-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⬡ SCU + CFA + SDHM — Sistem Unificat ⬡</h1>
+    <p style="text-align:center; color:#7EC8E3; font-size:13px; margin-bottom:10px;">
+        Arhitectură geometrică deterministă — Demonstrație integrată
+    </p>
+
+    <!-- ====== STATUS BAR ====== -->
+    <div class="status-bar" id="statusBar">
+        <div class="item"><span class="dot green"></span> S.C.U. (Meta)</div>
+        <div class="item"><span class="dot blue"></span> CFA (Fizic)</div>
+        <div class="item"><span class="dot orange"></span> SDHM (Memorie)</div>
+        <div class="item"><span class="dot green"></span> Logos Dual (Nucleu)</div>
+        <div class="item" id="statusTime">⏱️ 00:00:00</div>
+    </div>
+
+    <!-- ====== PANOU DE CONTROL ====== -->
+    <div class="control-panel">
+        <button onclick="runFullDemo()">▶️ Rulează Demo Complet</button>
+        <button onclick="simulateEngine()" class="secondary">⚙️ Simulează Motor CFA</button>
+        <button onclick="simulateMemory()" class="secondary">🧠 Simulează SDHM</button>
+        <button onclick="resetSystem()" class="secondary">🔄 Reset</button>
+        <select id="scenarioSelect" onchange="loadScenario(this.value)">
+            <option value="default">📋 Scenariu: Default</option>
+            <option value="thermal">🔥 Răcire termică</option>
+            <option value="engine">⚙️ Motor ardere</option>
+            <option value="cognitive">🧠 Învățare cognitivă</option>
+        </select>
+    </div>
+
+    <!-- ====== GRILA STRATURI ====== -->
+    <div class="layers-grid">
+        <!-- Stratul 4: S.C.U. -->
+        <div class="layer-card">
+            <div class="title">
+                <span class="badge badge-meta">META</span>
+                <span>S.C.U. — Sistem de Conformație Universală</span>
+            </div>
+            <div style="font-size:12px; color:#7EC8E3;">
+                <div>🔹 Axioma Zero: <span id="axiomaZero" style="color:#FFD700;">Numitor comun activ</span></div>
+                <div>🔹 Rețea de puncte: <span id="puncteRetea">12 noduri active</span></div>
+                <div>🔹 Motor C.G. 1100: <span id="motorCG">Punctul Fix 8</span></div>
+            </div>
+        </div>
+
+        <!-- Stratul 2: CFA (Fizic) -->
+        <div class="layer-card">
+            <div class="title">
+                <span class="badge badge-fizic">FIZIC</span>
+                <span>CFA — Continuous Flow Architecture</span>
+            </div>
+            <div style="font-size:12px; color:#7EC8E3;">
+                <div>🔹 Inverse Coandă: <span id="inverseCoanda" style="color:#90EE90;">Activ</span></div>
+                <div>🔹 Ciclu 3 timpi: <span id="ciclul3Timpi">I → II → III</span></div>
+                <div>🔹 Rotație fluidă: <span id="rotatieFluida" style="color:#FFD700;">~0.00 RPM</span></div>
+            </div>
+        </div>
+
+        <!-- Stratul 3: SDHM -->
+        <div class="layer-card">
+            <div class="title">
+                <span class="badge badge-memorie">MEMORIE</span>
+                <span>SDHM — Memorie Dinamică Ierarhică</span>
+            </div>
+            <div style="font-size:12px; color:#7EC8E3;">
+                <div>🔹 Ruletă: <span id="ruleta">[ ]</span></div>
+                <div>🔹 Calendar: <span id="calendar">0 arhivate</span></div>
+                <div>🔹 Context Lock: <span id="contextLock">Niciunul activ</span></div>
+            </div>
+        </div>
+
+        <!-- Stratul 1: Logos Dual -->
+        <div class="layer-card">
+            <div class="title">
+                <span class="badge badge-info">NUCLEU</span>
+                <span>Logos Dual — Nucleul Matematic</span>
+            </div>
+            <div style="font-size:12px; color:#7EC8E3;">
+                <div>🔹 Punctul Fix 8: <span id="punctFix8" style="color:#FFD700;">8</span></div>
+                <div>🔹 Noua Liniaritate: <span id="nouaLiniaritate">0.00000000</span></div>
+                <div>🔹 E = g(x) + 2tD: <span id="energieE">0.00000000</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== CANVAS: REȚEAUA DE PUNCTE ====== -->
+    <div class="canvas-wrapper">
+        <h3 style="color:#7EC8E3; margin-bottom:8px;">⬡ Rețeaua de Puncte — Geometria Gândirii ⬡</h3>
+        <canvas id="puncteCanvas" width="700" height="700"></canvas>
+    </div>
+
+    <!-- ====== ZONA DE OUTPUT ====== -->
+    <div id="output">
+        <span class="info">⬡ Sistem gata. Apasă "Rulează Demo Complet" pentru a vedea toate straturile în acțiune.</span>
+    </div>
+
+</div>
+
+<script>
+    // ================================================================
+    // 1. DATE DE BAZĂ ȘI STARE GLOBALĂ
+    // ================================================================
+
+    const state = {
+        // S.C.U.
+        axiomaZero: 'Numitor comun activ',
+        puncte: 12,
+        // CFA
+        inverseCoanda: true,
+        ciclu: 1, // 1, 2, 3
+        rpm: 0,
+        // SDHM
+        ruleta: [],
+        calendar: [],
+        contextLock: null,
+        // Logos Dual
+        constantaL: 0,
+        energieE: 0,
+        // Timp
+        startTime: Date.now(),
+        running: false,
+        interval: null,
+    };
+
+    const CORE_VALUE = 42; // Valoare nucleu pentru calcule
+
+    // ================================================================
+    // 2. MOTORUL LOGOS DUAL
+    // ================================================================
+
+    function logosDual(input) {
+        const PUNCT_FIX = 8;
+        const RADICAL_0 = 0.000000001;
+        const AXA_INF = Math.pow(4, 2) * 1000000000;
+
+        const core = typeof input === 'number' ? input : input.split('').filter(c => !isNaN(c) && c !== ' ').map(Number).reduce((a, b) => a + b, 0);
+
+        const constantaL = ((core * AXA_INF * RADICAL_0) % PUNCT_FIX) / PUNCT_FIX;
+        const g_x = constantaL;
+        const timpDilatare = 0.01;
+        const factor2td = 2 * timpDilatare * core;
+        const energieE = g_x + factor2td;
+
+        return { constantaL, energieE, g_x, factor2td };
+    }
+
+    // ================================================================
+    // 3. SIMULARE CFA (MOTOR + RĂCIRE)
+    // ================================================================
+
+    function simulateCFA(pressure, scenario) {
+        // Inverse Coandă: R = (P * tan(alpha/2)) / (1 + tan^2(alpha/2))
+        const alpha = 1.16; // raport geometric
+        const repulsion = (pressure * Math.tan(alpha / 2)) / (1 + Math.tan(alpha / 2) ** 2);
+
+        // Ciclu 3 timpi
+        state.ciclu = (state.ciclu % 3) + 1;
+
+        // RPM simulat
+        const baseRPM = 1500;
+        const efficiency = 0.9; // 90% eficiență
+        state.rpm = baseRPM * efficiency * (1 + repulsion * 0.01);
+
+        // Răcire termică
+        const thermalLoad = 100 - repulsion * 0.5;
+        const coolingEfficiency = Math.min(100, thermalLoad);
+
+        return {
+            repulsion,
+            ciclu: state.ciclu,
+            rpm: state.rpm,
+            thermalLoad: thermalLoad,
+            coolingEfficiency: coolingEfficiency,
+            status: repulsion > 0.5 ? '⚡ Flux optim' : '🌀 Flux normal'
+        };
+    }
+
+    // ================================================================
+    // 4. SIMULARE SDHM (MEMORIE)
+    // ================================================================
+
+    function simulateSDHM(input, priority) {
+        // Fractal addressing: 1.1/1 (critic), 1.1/2 (suport)
+        const address = priority >= 4.5 ? '1.1/1' : priority >= 3 ? '1.1/2' : '1.2/1';
+        const isCritical = address === '1.1/1';
+
+        // Context Locking
+        if (isCritical) {
+            state.contextLock = address;
+        }
+
+        // Adaugă în Ruletă
+        const entry = {
+            id: Date.now().toString(36),
+            input: input.substring(0, 30),
+            address,
+            priority,
+            timestamp: new Date().toLocaleTimeString()
+        };
+
+        state.ruleta.push(entry);
+
+        // Dacă ruleta depășește 5, evictează în Calendar
+        if (state.ruleta.length > 5) {
+            const evicted = state.ruleta.shift();
+            state.calendar.push(evicted);
+        }
+
+        return {
+            entry,
+            ruletaSize: state.ruleta.length,
+            calendarSize: state.calendar.length,
+            isCritical,
+            address
+        };
+    }
+
+    // ================================================================
+    // 5. S.C.U. — COMPILATOR GEOMETRIC
+    // ================================================================
+
+    function compileSCU(tema, context) {
+        // Axioma Zero: numitor comun
+        const numitorComun = context || 'Identitate';
+
+        // Rețea de puncte: generare din temă
+        const puncte = tema.split(' ').filter(w => w.length > 2);
+        const noduri = puncte.map((p, i) => ({
+            id: i + 1,
+            concept: p,
+            weight: (p.length * 7 + i * 3) % 10
+        }));
+
+        // Motor C.G. 1100
+        const logos = logosDual(tema);
+
+        // Rezultat compilat
+        return {
+            numitorComun,
+            noduri,
+            puncteTotal: noduri.length,
+            constantaL: logos.constantaL,
+            energieE: logos.energieE,
+            output: `Geometrie compilată din: "${tema}" → ${noduri.length} noduri, L=${logos.constantaL.toFixed(6)}`
+        };
+    }
+
+    // ================================================================
+    // 6. DESENARE CANVAS (REȚEAUA DE PUNCTE)
+    // ================================================================
+
+    function drawNetwork(noduri, highlightIndex) {
+        const canvas = document.getElementById('puncteCanvas');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const cx = w / 2;
+        const cy = h / 2;
+        const radius = Math.min(w, h) * 0.4;
+
+        // Dacă nu sunt noduri, desenează cercul de bază
+        if (!noduri || noduri.length === 0) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#2A3A5A';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#7EC8E3';
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('Axioma Zero', cx, cy + 25);
+            return;
+        }
+
+        // Desenează cercul de bază
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#2A3A5A';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Desenează nodurile
+        const count = Math.min(noduri.length, 12);
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
+            const x = cx + radius * Math.cos(angle);
+            const y = cy + radius * Math.sin(angle);
+
+            // Linie către centru
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = i === highlightIndex ? '#FFD700' : '#1A2A3A';
+            ctx.lineWidth = i === highlightIndex ? 2 : 0.5;
+            ctx.stroke();
+
+            // Cerc nod
+            const isHighlight = i === highlightIndex || (highlightIndex === undefined && i % 2 === 0);
+            ctx.beginPath();
+            ctx.arc(x, y, isHighlight ? 8 : 5, 0, 2 * Math.PI);
+            ctx.fillStyle = isHighlight ? '#FFD700' : '#00CED1';
+            ctx.fill();
+
+            // Etichetă
+            ctx.fillStyle = '#7EC8E3';
+            ctx.font = '9px monospace';
+            ctx.textAlign = 'center';
+            const label = noduri[i]?.concept || `N${i+1}`;
+            ctx.fillText(label.substring(0, 8), x, y - 14);
+        }
+
+        // Axioma Zero (centru)
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.fillStyle = '#7EC8E3';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚫ Numitor comun', cx, cy + 25);
+    }
+
+    // ================================================================
+    // 7. FUNCȚII DE ACTUALIZARE UI
+    // ================================================================
+
+    function updateUI(logosResult, cfaResult, sdhResult, scuResult) {
+        // Logos Dual
+        if (logosResult) {
+            document.getElementById('nouaLiniaritate').textContent = logosResult.constantaL.toFixed(8);
+            document.getElementById('energi
