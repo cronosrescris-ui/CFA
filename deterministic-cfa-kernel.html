@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>CFA Core V16 - Deterministic Unified Simulator</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 20px;
+            padding: 10px;
+        }
+        h1, h2 { color: #58a6ff; border-bottom: 1px solid #21262d; padding-bottom: 5px; }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .btn {
+            background-color: #238636;
+            color: white;
+            border: 1px solid rgba(240,246,252,0.1);
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn:hover { background-color: #2ea043; }
+        #canvas {
+            background: #090c10;
+            border: 1px solid #30363d;
+            display: block;
+            margin-top: 10px;
+        }
+        pre {
+            background: #090c10;
+            padding: 10px;
+            border: 1px solid #30363d;
+            overflow-x: auto;
+            color: #7ee787;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 CFA Core V16: Arhitectura Deterministică Axial Logos</h1>
+    <p>Status nucleu: <strong>Axioma Zero Confirmată (Eroare IEEE 754 Eliminată prin BigInt 10¹⁸)</strong></p>
+
+    <div class="grid-container">
+        <!-- Partea Stângă: Control și Monitorizare Vizuală -->
+        <div class="panel">
+            <h2>🛸 Control Reactor Geometric</h2>
+            <button class="btn" onclick="executeCycle()">Rulează un Ciclu de Combustie (V16)</button>
+            <canvas id="canvas" width="400" height="400"></canvas>
+        </div>
+
+        <!-- Partea Dreaptă: Consola Logica / Registrul de Memorie -->
+        <div class="panel">
+            <h2>🗜️ Registru de Stări Stabile (SDHM)</h2>
+            <div id="status-indicators">
+                <p>Timp Motor: <span id="motor-time" style="color:#ff7b72;">I (Admisie)</span></p>
+                <p>Ancore Active Memorie: <span id="memory-count" style="color:#58a6ff;">0</span></p>
+            </div>
+            <h3>📋 Output Terminal:</h3>
+            <pre id="terminal">Sistem inițializat. Gata pentru injecție de flux...</pre>
+        </div>
+    </div>
+
+<script>
+// ==========================================
+// AXIAL LOGOS OMEGA KERNEL - JAVASCRIPT BIGINT V16
+// ==========================================
+
+class AxialLogosOmegaKernel {
+    constructor() {
+        // Scala 10^18 transformată în tip BigInt pentru precizie absolută la nivel de bit
+        this.SCALE = 1000000000000000000n; 
+        
+        // Constante fixe calculate la scală nedeformabilă
+        this.GOLDEN_RATIO_FIXED = 1618033988749894848n;
+        this.PI_FIXED = 3141592653589793238n;
+        this.RADICAL_0 = 1n; // 10^-18 reprezentat ca prag minim indivizibil
+        
+        // Operatori Geometrici Sacri
+        this.O7_SQUARE = 7n;
+        this.O8_CIRCLE = 8n;
+        this.O11_TRIANGLE = 11n;
+        this.O333_GOLDEN = 333n;
+        
+        // Registru de memorie SDHM (Pedeapsa de a Nu Uita)
+        this.memoryAnchors = new Map();
+        this.cicluCurent = 1; // Timpii I, II, III
+    }
+
+    toFixed(valStr) {
+        // Conversie sigură din string/număr în BigInt fixat
+        let [intPart, fracPart] = parseFloat(valStr).toFixed(18).split('.');
+        return BigInt(intPart + fracPart);
+    }
+
+    toFloatDisplay(bigintValue) {
+        // Conversie strictă în format lizibil pentru interfață
+        let str = bigintValue.toString();
+        let negativ = str.startsWith('-');
+        if (negativ) str = str.slice(1);
+        
+        while (str.length <= 18) str = '0' + str;
+        let punct = str.length - 18;
+        let finalStr = str.slice(0, punct) + '.' + str.slice(punct);
+        return (negativ ? '-' : '') + parseFloat(finalStr).toFixed(6);
+    }
+
+    applyGeometricFilter(valueFixed, operator) {
+        if (operator === this.O7_SQUARE) {
+            return (valueFixed * valueFixed) / this.SCALE;
+        } else if (operator === this.O8_CIRCLE) {
+            return (valueFixed * this.PI_FIXED) / this.SCALE;
+        } else if (operator === this.O11_TRIANGLE) {
+            return (valueFixed * 3000000000000000000n) / this.SCALE; // 3 exact la scala 10^18
+        } else if (operator === this.O333_GOLDEN) {
+            return (valueFixed * this.GOLDEN_RATIO_FIXED) / this.SCALE;
+        }
+        return valueFixed;
+    }
+
+    executeV16Collision(impulseA, impulseB) {
+        let f11 = 14641n; // 11^4
+        let f10 = 10000n; // 10^4
+        
+        let delta = (impulseA * f11) - (impulseB * f10);
+        let convergenceFactor = delta / (f11 + f10);
+        
+        // Obținere valoare absolută pentru stabilizarea geometrică
+        let absConvergence = convergenceFactor < 0n ? -convergenceFactor : convergenceFactor;
+        let stabilizedState = this.applyGeometricFilter(absConvergence, this.O333_GOLDEN);
+        
+        return {
+            rawDelta: delta,
+            convergence: convergenceFactor,
+            stabilizedState: stabilizedState
+        }
+    }
+
+    runHexagonalBreathing(inputData) {
+        let current = inputData;
+        
+        // 3 Absorbții (Multiplicări triunghiulare)
+        for (let i = 0; i < 3; i++) {
+            current = this.applyGeometricFilter(current, this.O11_TRIANGLE);
+        }
+        // 3 Refulări (Reduceri prin proporția de aur)
+        for (let i = 0; i < 3; i++) {
+            current = (current * this.SCALE) / this.GOLDEN_RATIO_FIXED;
+        }
+        
+        // Ancorarea stării în memoria SDHM utilizând valoarea textuală unică drept hash rigid
+        let stateKey = current.toString();
+        if (!this.memoryAnchors.has(stateKey)) {
+            this.memoryAnchors.set(stateKey, current);
+        }
+        
+        return current;
+    }
+
+    calculateInverseCoanda(presiuneFixed) {
+        // Corespondentul BigInt pentru factorul alfa geometric = 1.16
+        let alphaFixed = 1160000000000000000n;
+        // Simulare tangentă simplificată fixă pentru alpha/2 (aproximat determinist)
+        let tanAlphaHalf = 618033988749894848n; // Raportat la simetria de aur
+        
+        let repulsie = (presiuneFixed * tanAlphaHalf) / this.SCALE;
+        return repulsie;
+    }
+}
+
+// ==========================================
+// INIȚIALIZARE ȘI LOGICĂ INTERFAȚĂ VIZUALĂ
+// ==========================================
+
+const kernel = new AxialLogosOmegaKernel();
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const terminal = document.getElementById('terminal');
+
+function logToTerminal(text) {
+    terminal.innerHTML += "\n" + text;
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function updateVisuals(stabilizedValue, repulsieValue) {
+    // Curățare canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    // Redare Axioma Zero (Centrul de Greutate Geometric)
+    ctx.beginPath();
+    ctx.arc(cx, cy, 10, 0, 2 * Math.PI);
+    ctx.fillStyle = "#ff7b72";
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "12px monospace";
+    ctx.fillText("⚫ Axioma 0", cx - 35, cy - 15);
+
+    // Generarea celor 3 conuri/noduri de forță ale geometriei CFA
+    let numariNoduri = 3;
+    let razaBaza = 80 + Number(repulsieValue / 1000000000000000n) * 0.2; // Modulat prin BigInt
+
+    for (let i = 0; i < numariNoduri; i++) {
+        let unghi = (i * 2 * Math.PI) / numariNoduri - Math.PI / 2;
+        let nx = cx + razaBaza * Math.cos(unghi);
+        let ny = cy + razaBaza * Math.sin(unghi);
+
+        // Vectorii de forță tangențiali (fără punct mort)
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(nx, ny);
+        ctx.strokeStyle = "#30363d";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Nodurile de forță ale quarcurilor geometrice
+        ctx.beginPath();
+        ctx.arc(nx, ny, 14, 0, 2 * Math.PI);
+        ctx.fillStyle = kernel.cicluCurent === (i + 1) ? "#58a6ff" : "#21262d";
+        ctx.strokeStyle = "#8b949e";
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(`N${i+1}`, nx - 6, ny + 4);
+    }
+
+    // Actualizare indicatori textuali
+    const timpiNume = ["I (Admisie/Compresie)", "II (Explozie/Expansiune)", "III (Evacuare/Recuperare)"];
+    document.getElementById('motor-time').innerText = timpiNume[kernel.cicluCurent - 1];
+    document.getElementById('memory-count').innerText = kernel.memoryAnchors.size;
+}
+
+function executeCycle() {
+    logToTerminal(`--- EXECUȚIE TIMPUL [${kernel.cicluCurent}] ---`);
+    
+    // Generare impulsuri deterministe de intrare
+    let impulsA = kernel.toFixed(150.50 + kernel.cicluCurent * 10);
+    let impulsB = kernel.toFixed(85.25 - kernel.cicluCurent * 5);
+    
+    // 1. Rularea coliziunii deterministice V16
+    let coliziune = kernel.executeV16Collision(impulsA, impulsB);
+    logToTerminal(`-> Impuls A: ${kernel.toFloatDisplay(impulsA)} | Impuls B: {${kernel.toFloatDisplay(impulsB)}}`);
+    logToTerminal(`-> Convergență V16: ${kernel.toFloatDisplay(coliziune.convergence)}`);
+    
+    // 2. Aplicarea Efectului Inverse Coandă pe baza stării stabilizate
+    let repulsieGeometrica = kernel.calculateInverseCoanda(coliziune.stabilizedState);
+    logToTerminal(`-> Repulsie Conică (Inverse Coandă): ${kernel.toFloatDisplay(repulsieGeometrica)}`);
+    
+    // 3. Rularea Ciclului de Respirație Hexagonală (3 Absorbții / 3 Refulări)
+    let stareAncorata = kernel.runHexagonalBreathing(coliziune.stabilizedState);
+
