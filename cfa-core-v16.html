@@ -1,0 +1,99 @@
+// ==========================================
+// INIȚIALIZARE ȘI LOGICĂ INTERFAȚĂ VIZUALĂ
+// ==========================================
+
+const kernel = new AxialLogosOmegaKernel();
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const terminal = document.getElementById('terminal');
+
+function logToTerminal(text) {
+    terminal.innerHTML += "\n" + text;
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function updateVisuals(stabilizedValue, repulsieValue) {
+    // Curățare canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    // Redare Axioma Zero (Centrul de Greutate Geometric)
+    ctx.beginPath();
+    ctx.arc(cx, cy, 10, 0, 2 * Math.PI);
+    ctx.fillStyle = "#ff7b72";
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "12px monospace";
+    ctx.fillText("⚫ Axioma 0", cx - 35, cy - 15);
+
+    // Generarea celor 3 conuri/noduri de forță ale geometriei CFA
+    let numariNoduri = 3;
+    let razaBaza = 80 + Number(repulsieValue / 1000000000000000n) * 0.2; // Modulat prin BigInt
+
+    for (let i = 0; i < numariNoduri; i++) {
+        let unghi = (i * 2 * Math.PI) / numariNoduri - Math.PI / 2;
+        let nx = cx + razaBaza * Math.cos(unghi);
+        let ny = cy + razaBaza * Math.sin(unghi);
+
+        // Vectorii de forță tangențiali (fără punct mort)
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(nx, ny);
+        ctx.strokeStyle = "#30363d";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Nodurile de forță ale quarcurilor geometrice
+        ctx.beginPath();
+        ctx.arc(nx, ny, 14, 0, 2 * Math.PI);
+        ctx.fillStyle = kernel.cicluCurent === (i + 1) ? "#58a6ff" : "#21262d";
+        ctx.strokeStyle = "#8b949e";
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(`N${i+1}`, nx - 6, ny + 4);
+    }
+
+    // Actualizare indicatori textuali
+    const timpiNume = ["I (Admisie/Compresie)", "II (Explozie/Expansiune)", "III (Evacuare/Recuperare)"];
+    document.getElementById('motor-time').innerText = timpiNume[kernel.cicluCurent - 1];
+    document.getElementById('memory-count').innerText = kernel.memoryAnchors.size;
+}
+
+function executeCycle() {
+    logToTerminal(`--- EXECUȚIE TIMPUL [${kernel.cicluCurent}] ---`);
+    
+    // Generare impulsuri deterministe de intrare
+    let impulsA = kernel.toFixed(150.50 + kernel.cicluCurent * 10);
+    let impulsB = kernel.toFixed(85.25 - kernel.cicluCurent * 5);
+    
+    // 1. Rularea coliziunii deterministice V16
+    let coliziune = kernel.executeV16Collision(impulsA, impulsB);
+    logToTerminal(`-> Impuls A: ${kernel.toFloatDisplay(impulsA)} | Impuls B: ${kernel.toFloatDisplay(impulsB)}`);
+    logToTerminal(`-> Convergență V16: ${kernel.toFloatDisplay(coliziune.convergence)}`);
+    
+    // 2. Aplicarea Efectului Inverse Coandă pe baza stării stabilizate
+    let repulsieGeometrica = kernel.calculateInverseCoanda(coliziune.stabilizedState);
+    logToTerminal(`-> Repulsie Conică (Inverse Coandă): ${kernel.toFloatDisplay(repulsieGeometrica)}`);
+    
+    // 3. Rularea Ciclului de Respirație Hexagonală (3 Absorbții / 3 Refulări)
+    let stareAncorata = kernel.runHexagonalBreathing(coliziune.stabilizedState);
+    logToTerminal(`-> Stare Ancorată SDHM (Respirație): ${kernel.toFloatDisplay(stareAncorata)}`);
+    logToTerminal(`📌 Matrice Memorie Securizată static.`);
+
+    // 4. Actualizare interfață vizuală în timp real
+    updateVisuals(coliziune.stabilizedState, repulsieGeometrica);
+
+    // 5. Rotirea deterministă a timpilor motorului (Ciclul I -> II -> III)
+    kernel.cicluCurent = kernel.cicluCurent === 3 ? 1 : kernel.cicluCurent + 1;
+}
+
+// Inițializare vizuală la prima încărcare a simulatorului
+updateVisuals(0n, 0n);
+</script>
+</body>
+    </html>
+      
